@@ -1,0 +1,13 @@
+FROM python:3.8-alpine
+RUN adduser -D automode
+WORKDIR /home/automode
+ENV PYTHONUNBUFFERED 1
+COPY ./ ./
+RUN apk add --no-cache \
+    build-base \
+    libressl-dev \
+    musl-dev \
+    libffi-dev
+RUN pip install -r requirements.txt
+RUN chown -R automode:automode ./
+USER automode

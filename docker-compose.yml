@@ -1,0 +1,62 @@
+version: '3'
+
+services:
+    mongo:
+        image: mongo
+        container_name: mongodb1
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+        ports:
+            - '27019:27017'
+        restart: always
+        volumes: 
+            - ./data/db:/data/db
+    mongo-express:
+        image: mongo-express
+        container_name: mongodb_ui1
+        environment:
+            - ME_CONFIG_MONGODB_SERVER=mongodb1
+            - ME_CONFIG_MONGODB_PORT=27017
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_ROOT_USER}
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_ROOT_PASSWORD}
+            - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_LOGIN}
+            - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_PASSWORD}
+        depends_on:
+            - mongo
+        ports:
+            - '8889:8081'
+        restart: always
+        volumes: 
+            - ./data/db:/data/db
+    automode_api:
+        container_name: automode_api
+        image: automode:latest
+        env_file: app.env
+        build: ./app
+        command: python main.py
+        ports:
+        - '8001:8000'
+        depends_on:
+        - mongo
+        links:
+        - mongo
+        volumes:
+        - ./app:/home/automode
+    frontend:
+        build:
+            context: ./frontend
+            dockerfile: DockerFile
+        env_file: app.env
+        ports:
+        - 3000:3000
+        depends_on:
+        - automode_api
+    nginx:
+        image: nginx
+        ports:
+        - 80:80
+        volumes:
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+        depends_on:
+        - frontend

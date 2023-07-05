@@ -17,18 +17,20 @@ git clone https://github.com/your-username/project-name.git
 ```bash
 cd project-name
 ```
-3. Build and start the Docker containers using Docker Compose:
+3. Copy your Frontend code in `frontend` directory
+4. Add .env and other environment files accordingly
+5. Build and start the Docker containers using Docker Compose:
 ```bash
 docker-compose up -d
 ```
    This command will download the necessary Docker images and start the containers in the background.
 
-4. Access the application:
+6. Access the application:
 
 - Open your web browser and go to [http://localhost](http://localhost).
 - To access the FastAPI list documentation, go to [http://localhost:8000/docs](http://localhost:8000/docs).
 
-5. Stop the Docker containers:
+7. Stop the Docker containers:
 ```bash
 docker-compose down
 ```

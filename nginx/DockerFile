@@ -1,0 +1,11 @@
+# Use the official Nginx image as the base image
+FROM nginx
+
+# Copy the Nginx configuration file to the appropriate location
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Expose port 80 for incoming requests
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
