@@ -67,7 +67,43 @@ def send_otp_email(user_email, otp):
     except Exception as e:
         print("Error Occured: {0}".format(e))
         raise InternalServerErrorException("Something went wrong while sending otp to the email.")
+        
+async def verify_reset_otp(stored_user, otp, verification_attempts):
 
+    if not stored_user:
+        raise NotFoundException("User not found")
+
+    # Get the stored OTP and its expiration time from the user document
+    stored_otp = stored_user.get("reset_otp")
+    expiration_time = stored_user.get("reset_otp_expiry")
+
+    if not stored_otp or not expiration_time:
+        raise NotFoundException("OTP not found")
+
+    # Check if OTP has expired
+    if datetime.now() > expiration_time:
+        raise UnauthorizedException("OTP has expired")
+
+    # Validate the OTP
+    if stored_otp==otp:
+        await update_user(stored_user["_id"],{
+            "password_verify": "verified",
+            "reset_otp": "", 
+            "otp_expiry": ""
+            })
+        return True
+    else:
+        verification_attempts+=1
+        if verification_attempts >= 3:
+            await update_user(stored_user["_id"],{
+                "password_verify": "",
+                "reset_otp": "",
+                "otp_expiry": ""
+                })
+            raise UnauthorizedException("Verification failed. Maximum attempts reached.")
+        else:
+            await update_user(stored_user["_id"],{"reset_verification_attempts": verification_attempts})
+            raise UnauthorizedException("Invalid OTP. Attempts remaining: {}/3".format(3 - verification_attempts))
     
 async def verify_otp(stored_user, otp, verification_attempts):
 
@@ -89,7 +125,7 @@ async def verify_otp(stored_user, otp, verification_attempts):
     if stored_otp==otp:
         await update_user(stored_user["_id"],{
             "otp": "", 
-            # "otp_expiry": ""
+            "otp_expiry": ""
             })
         return True
     else:
@@ -97,7 +133,7 @@ async def verify_otp(stored_user, otp, verification_attempts):
         if verification_attempts >= 3:
             await update_user(stored_user["_id"],{
                 "otp": "",
-                # "otp_expiry": ""
+                "otp_expiry": ""
                 })
             raise UnauthorizedException("Verification failed. Maximum attempts reached.")
         else:

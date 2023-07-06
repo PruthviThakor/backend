@@ -51,6 +51,17 @@ class VerificationSchema(BaseModel):
             }
         }
 
+class ResetSchema(BaseModel):
+    id: str = Field(...)
+    password: str = Field(...)
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "id": "1234567890",
+                "password": "cbsjdbsde39dshds",
+            }
+        }
 class UserLoginSchema(BaseModel):
     id: str = Field(...)
     password: str = Field(...)
