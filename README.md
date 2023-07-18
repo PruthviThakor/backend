@@ -1,4 +1,4 @@
-# Automode
+# Backend
 
 This project utilizes Docker Compose for easy setup and deployment.
 
